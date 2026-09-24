@@ -1,0 +1,11 @@
+.env
+node_modules/
+.DS_Store
+
+# Design references only — not for the public repo (see CLAUDE.md: "Do not ship anything in it").
+# build_manager.py and manager-old-dashboard-version.html are NOT here: the build script needs them.
+reference/car-outline-reference-DO-NOT-SHIP.png
+reference/logo-sheet-source.png
+reference/marina-calendar-multi-service-pill.png
+reference/marina-calendar.png
+reference/original-logo-small.png

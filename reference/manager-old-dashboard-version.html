@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inside the Door Detailing · Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Barlow+Condensed:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --black: #000000;
+    --ink: #f4f4f2;
+    --mute: #a3a3a3;
+    --line: #252525;
+    --panel: #0c0c0c;
+    --panel-2: #141414;
+    --red: #e5121f;
+    --red-text: #ff4650;
+    --c-basic: #4b6fb7;
+    --c-deep: #b45f14;
+    --c-leather: #d92d2d;
+    --c-specialty: #6b7078;
+    --font: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --logo: url("../assets/logo.png");
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { background: var(--black); scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 80px); }
+  body { margin: 0; background: var(--black); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 2px; }
+  [hidden] { display: none !important; }
+
+  /* ---------- Top bar ---------- */
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    display: flex; align-items: stretch; gap: 8px; min-height: 66px; padding: 0 22px;
+    background: #000; border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; margin-right: 18px; flex: none; }
+  .logo { display: block; height: 54px; aspect-ratio: 874 / 414; background: var(--logo) center / contain no-repeat; }
+  .tabs { display: flex; align-items: stretch; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    font-family: var(--display); font-style: italic; font-weight: 700; font-size: 20px; letter-spacing: .06em; text-transform: uppercase;
+    color: #bdbdbd; background: none; border: 0; border-bottom: 3px solid transparent; padding: 0 24px; cursor: pointer; white-space: nowrap;
+  }
+  .tab:hover { color: #fff; }
+  .tab[aria-selected="true"] { color: #fff; background: var(--panel-2); border-bottom-color: var(--red); }
+  .ext { margin-left: auto; align-self: center; font-size: 14px; color: var(--mute); white-space: nowrap; }
+  .ext:hover { color: #fff; }
+
+  .wrap { width: min(1240px, 100% - 44px); margin-inline: auto; padding-block: 26px 90px; }
+
+  .vhead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 6px 24px; padding-bottom: 10px; border-bottom: 2px solid var(--red); margin-bottom: 28px; }
+  .vhead h1 { margin: 0; font-family: var(--display); font-style: italic; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; font-size: clamp(34px, 4.6vw, 50px); line-height: 1; }
+  .vhead p { margin: 0; color: var(--mute); }
+
+  /* ---------- Calendar ---------- */
+  .ctrl { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 24px; }
+  .arrow { background: none; border: 0; cursor: pointer; font-size: 28px; line-height: 1; padding: 4px 12px; color: var(--ink); }
+  .arrow:hover { color: var(--red-text); }
+  .datepill {
+    display: inline-flex; align-items: baseline; gap: 12px; padding: 10px 32px; border-radius: 999px;
+    background: var(--panel); border: 1px solid #3a3a3a; color: var(--mute); font-size: 18px; cursor: pointer;
+  }
+  .datepill b { color: #fff; font-weight: 700; }
+  .datepill:hover { border-color: #777; }
+  .makebtn { background: var(--red); color: #fff; font-weight: 700; border: 0; border-radius: 999px; padding: 11px 26px; font-size: 16px; cursor: pointer; }
+  .makebtn:hover { background: #ff1f2d; }
+
+  .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; margin-bottom: 18px; color: #d0d0d0; font-size: 15px; }
+  .legend > span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 16px; height: 16px; border-radius: 4px; display: inline-block; flex: none; }
+  .capdemo { display: inline-flex; gap: 3px; }
+  .capdemo i { width: 7px; height: 16px; border-radius: 4px; display: block; box-shadow: 0 0 0 1px rgba(255,255,255,.45); }
+  .ckd { font-weight: 800; }
+
+  .dow, .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .dow { border-top: 1px solid var(--line); }
+  .dow div { text-align: center; font-weight: 700; font-size: 13px; letter-spacing: .07em; color: var(--mute); padding: 13px 0; }
+  .grid { border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .day {
+    min-width: 0; min-height: 152px; padding: 8px 8px 10px; display: flex; flex-direction: column; gap: 5px;
+    background: #050505; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); position: relative;
+  }
+  .day.out { background: #000; }
+  .day .n { align-self: flex-end; font-weight: 700; font-size: 15px; color: #d8d8d8; text-decoration: underline; text-underline-offset: 3px; margin-bottom: 2px; }
+  .day.out .n { color: #5c5c5c; text-decoration: none; font-weight: 600; }
+  .day.today { outline: 3px solid var(--ink); outline-offset: -3px; z-index: 1; }
+
+  .calscroll { overflow-x: auto; padding-bottom: 6px; }
+  .calin { min-width: 1050px; }
+  .ev {
+    position: relative; display: flex; align-items: center; gap: 7px; width: 100%; min-height: 32px; padding: 5px 9px;
+    border: 0; border-radius: 6px; background: var(--c); color: #fff; font-weight: 700; font-size: 13.5px; line-height: 1.2; text-align: left; cursor: pointer;
+  }
+  .ev .nm { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+  .ev .ck { flex: none; font-weight: 800; opacity: .92; }
+  .ev .caps { margin-left: auto; flex: none; display: flex; gap: 4px; padding-left: 4px; }
+  .ev .caps i { display: block; width: 10px; height: 22px; border-radius: 6px; box-shadow: 0 0 0 1px rgba(255,255,255,.55); }
+  .ev .tip {
+    position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 10; pointer-events: none; opacity: 0; transform: translateY(3px);
+    background: var(--ink); color: #000; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; white-space: nowrap;
+    transition: opacity .12s ease, transform .12s ease;
+  }
+  .ev .tip.r { left: auto; right: 0; }
+  .ev:hover .tip, .ev:focus-visible .tip { opacity: 1; transform: none; }
+
+  /* ---------- Dashboard ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 38px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); padding: 18px 20px 16px; }
+  .stat .v { font-family: var(--display); font-style: italic; font-weight: 700; font-size: 48px; line-height: 1; }
+  .stat .k { margin-top: 6px; color: var(--mute); font-size: 14px; }
+  .sec { margin: 0 0 12px; font-family: var(--display); font-style: italic; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; font-size: 26px; }
+  .list { border: 1px solid var(--line); background: var(--panel); margin-bottom: 36px; }
+  .list .empty { padding: 20px; color: var(--mute); margin: 0; }
+  .row { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; padding: 14px 18px; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: 0; }
+  .row .when strong { display: block; }
+  .row .when span { color: var(--mute); font-size: 14px; }
+  .row .who strong { display: block; }
+  .row .who span { color: var(--mute); font-size: 14px; }
+  .row .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .dots { display: inline-flex; gap: 5px; align-items: center; margin-right: 8px; vertical-align: middle; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .foot { color: var(--mute); font-size: 14px; }
+  .linkbtn { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 14px; }
+
+  /* ---------- Buttons and forms ---------- */
+  .btn { display: inline-block; font-weight: 700; font-size: 16px; padding: 13px 24px; border-radius: 2px; border: 1px solid transparent; cursor: pointer; text-align: center; }
+  .btn.primary { background: var(--red); color: #fff; }
+  .btn.primary:hover { background: #ff1f2d; }
+  .btn.ghost { background: transparent; border-color: #444; color: var(--ink); }
+  .btn.ghost:hover { border-color: var(--ink); }
+  .btn.sm { font-size: 14px; padding: 8px 14px; }
+
+  .form { max-width: 760px; }
+  fieldset { border: 0; padding: 0; margin: 0 0 32px; min-width: 0; }
+  legend { padding: 0; margin-bottom: 6px; font-family: var(--display); font-style: italic; font-weight: 700; text-transform: uppercase; font-size: 24px; letter-spacing: .02em; }
+  .hint { margin: 0 0 14px; color: var(--mute); font-size: 15px; }
+  .field { display: grid; gap: 6px; margin-bottom: 16px; }
+  .field label { font-size: 15px; font-weight: 600; }
+  input[type=text], input[type=email], input[type=tel], input[type=date], select, textarea {
+    width: 100%; font: inherit; color: var(--ink); background: var(--black); border: 1px solid #3a3a3a; border-radius: 2px; padding: 13px 14px;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #fff; outline-offset: 1px; border-color: #fff; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .opt { display: block; position: relative; margin-bottom: 10px; cursor: pointer; }
+  .opt input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .opt .box { display: block; position: relative; padding: 14px 18px 14px 52px; background: var(--black); border: 1px solid #333; border-radius: 2px; }
+  .opt .box::before { content: ""; position: absolute; left: 18px; top: 17px; width: 18px; height: 18px; border: 2px solid #666; border-radius: 3px; }
+  .opt .box::after { content: ""; position: absolute; left: 23px; top: 21px; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg); opacity: 0; }
+  .opt input:checked + .box { border-color: var(--red); background: #140506; }
+  .opt input:checked + .box::before { background: var(--red); border-color: var(--red); }
+  .opt input:checked + .box::after { opacity: 1; }
+  .opt input:focus-visible + .box { outline: 2px solid #fff; outline-offset: 2px; }
+  .opt .name { display: block; font-weight: 600; }
+  .addons { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .nbsum { border: 1px solid #333; padding: 16px 18px; margin-bottom: 18px; }
+  .nbsum .r { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
+  .nbsum .r.dep { font-weight: 800; }
+  .err { color: var(--red-text); font-size: 14.5px; min-height: 1.4em; margin: 0 0 10px; }
+
+  /* ---------- Dialog ---------- */
+  dialog { width: min(580px, calc(100% - 24px)); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow: auto; padding: 0; background: var(--panel); color: var(--ink); border: 1px solid #3a3a3a; border-radius: 8px; }
+  dialog::backdrop { background: rgba(0,0,0,.74); }
+  .dlg-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 22px 24px 14px; border-bottom: 1px solid var(--line); }
+  .dlg-h h2 { margin: 0; font-family: var(--display); font-style: italic; font-weight: 700; text-transform: uppercase; font-size: 32px; line-height: 1.05; }
+  .dlg-h .sub { margin: 4px 0 0; color: var(--mute); }
+  .x { background: none; border: 1px solid #444; width: 38px; height: 38px; border-radius: 50%; font-size: 22px; line-height: 1; cursor: pointer; flex: none; }
+  .x:hover { border-color: #fff; }
+  .dlg-b { padding: 18px 24px 24px; }
+  .badge { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; margin: 0 0 16px; }
+  .badge.ok { border: 1px solid #fff; color: #fff; }
+  .badge.wait { border: 1px solid var(--red-text); color: var(--red-text); }
+  .kv { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 16px; margin: 0 0 20px; }
+  .kv dt { color: var(--mute); font-size: 14px; padding-top: 2px; }
+  .kv dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .dsec { margin: 0 0 8px; font-size: 14px; color: var(--mute); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .svc { list-style: none; margin: 0 0 8px; padding: 0; }
+  .svc li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .svc li .nm { flex: 1; font-weight: 600; }
+  .svc li .pr { color: var(--mute); }
+  .tot { border-top: 1px solid #333; padding-top: 10px; margin-bottom: 20px; }
+  .tot .r { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+  .tot .r.dep { font-weight: 800; }
+  .tot .r.mu { color: var(--mute); font-size: 15px; }
+  .dacts { display: flex; flex-wrap: wrap; gap: 10px; }
+  .warn { flex-basis: 100%; margin: 0; color: #e8e8e8; }
+  .dayrow { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 14px 4px; cursor: pointer; }
+  .dayrow:hover { background: var(--panel-2); }
+  .dayrow .t { width: 84px; color: var(--mute); flex: none; }
+  .dayrow .p { flex: 1; min-width: 0; font-weight: 600; }
+  .dayrow .p small { display: block; color: var(--mute); font-weight: 400; font-size: 14px; }
+
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); z-index: 50; background: var(--ink); color: #000; font-weight: 700; padding: 12px 20px; border-radius: 999px; max-width: calc(100% - 24px); }
+
+  @media (max-width: 760px) {
+    .bar { padding: 0 12px; }
+    .logo { height: 46px; }
+    .brand { margin-right: 8px; }
+    .tab { padding: 0 14px; font-size: 17px; }
+    .ext { display: none; }
+    .wrap { width: calc(100% - 20px); padding-top: 20px; }
+    .legend { font-size: 14px; gap: 8px 16px; }
+    .row { grid-template-columns: 1fr; }
+    .row .acts { justify-content: flex-start; }
+    .grid2, .addons { grid-template-columns: 1fr; }
+    .kv { grid-template-columns: 1fr; gap: 2px; }
+    .kv dd { margin-bottom: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ev .tip { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <a class="brand" href="#" aria-label="Inside the Door Detailing, manager"><span class="logo" role="img" aria-label="Inside the Door Detailing"></span></a>
+  <nav class="tabs" role="tablist" aria-label="Manager sections">
+    <button class="tab" role="tab" id="tab-dashboard" data-view="dashboard" aria-selected="false" aria-controls="view-dashboard" type="button">Dashboard</button>
+    <button class="tab" role="tab" id="tab-new" data-view="new" aria-selected="false" aria-controls="view-new" type="button">New booking</button>
+    <button class="tab" role="tab" id="tab-calendar" data-view="calendar" aria-selected="true" aria-controls="view-calendar" type="button">Calendar</button>
+  </nav>
+  <a class="ext" href="../" target="_blank" rel="noopener">View guest site</a>
+</header>
+
+<main class="wrap">
+
+  <!-- Dashboard -->
+  <section id="view-dashboard" class="view" role="tabpanel" aria-labelledby="tab-dashboard" hidden>
+    <div class="vhead"><h1>Dashboard</h1><p>What needs your attention</p></div>
+    <div class="stats" id="stats"></div>
+    <h2 class="sec">Needs confirmation</h2>
+    <div class="list" id="pendingList"></div>
+    <h2 class="sec">Today</h2>
+    <div class="list" id="todayList"></div>
+    <p class="foot">Sample bookings are shown for this prototype. <button type="button" class="linkbtn" id="resetData">Reset sample data</button></p>
+  </section>
+
+  <!-- New booking -->
+  <section id="view-new" class="view" role="tabpanel" aria-labelledby="tab-new" hidden>
+    <div class="vhead"><h1>New booking</h1><p>Add a phone or walk-in booking to the calendar</p></div>
+    <form class="form" id="nbForm" novalidate>
+      <fieldset>
+        <legend>Customer</legend>
+        <div class="field"><label for="nbName">Name</label><input type="text" id="nbName" autocomplete="off"></div>
+        <div class="grid2">
+          <div class="field"><label for="nbPhone">Phone</label><input type="tel" id="nbPhone" autocomplete="off"></div>
+          <div class="field"><label for="nbEmail">Email</label><input type="email" id="nbEmail" autocomplete="off"></div>
+        </div>
+        <div class="field"><label for="nbVehicle">Vehicle (year, make, model)</label><input type="text" id="nbVehicle" autocomplete="off"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Appointment</legend>
+        <div class="grid2">
+          <div class="field"><label for="nbDate">Date</label><input type="date" id="nbDate"></div>
+          <div class="field"><label for="nbTime">Start time</label><select id="nbTime"></select></div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Services</legend>
+        <p class="hint">Each service level shows in its own color on the calendar.</p>
+        <div id="nbServices"></div>
+        <p class="hint" style="margin-top:18px">Specialty add-ons (grey on the calendar)</p>
+        <div class="addons" id="nbAddons"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Details</legend>
+        <div class="field"><label for="nbNotes">Notes</label><textarea id="nbNotes" placeholder="Stains, smells, pets, gate codes..."></textarea></div>
+        <label class="opt"><input type="checkbox" id="nbConf" checked><span class="box"><span class="name">Mark as confirmed</span></span></label>
+        <label class="opt"><input type="checkbox" id="nbDep"><span class="box"><span class="name">Deposit collected</span></span></label>
+      </fieldset>
+      <div class="nbsum" aria-live="polite">
+        <div class="r"><span>Estimated total</span><span id="nbTotal"></span></div>
+        <div class="r dep"><span id="nbDepLabel"></span><span id="nbDepAmt"></span></div>
+      </div>
+      <p class="err" id="nbErr" role="alert"></p>
+      <button type="button" class="btn primary" id="nbSave">Add to calendar</button>
+    </form>
+  </section>
+
+  <!-- Calendar -->
+  <section id="view-calendar" class="view" role="tabpanel" aria-labelledby="tab-calendar">
+    <div class="vhead"><h1>Calendar</h1><p>Every booking, color-coded by service · click one for full details</p></div>
+    <div class="ctrl">
+      <button type="button" class="arrow" id="prevM" aria-label="Previous month">&larr;</button>
+      <button type="button" class="datepill" id="thisM" title="Jump to this month"><span>Date</span><b id="mlabel"></b></button>
+      <button type="button" class="arrow" id="nextM" aria-label="Next month">&rarr;</button>
+      <button type="button" class="makebtn" id="makeBtn">+ New booking</button>
+    </div>
+    <div class="legend" aria-label="Legend">
+      <span><i class="sw" style="background:var(--c-basic)"></i>Basic</span>
+      <span><i class="sw" style="background:var(--c-deep)"></i>Deep interior</span>
+      <span><i class="sw" style="background:var(--c-leather)"></i>Leather &amp; upholstery</span>
+      <span><i class="sw" style="background:var(--c-specialty)"></i>Specialty</span>
+      <span><span class="capdemo"><i style="background:var(--c-deep)"></i><i style="background:var(--c-leather)"></i></span>More services on the same booking</span>
+      <span><b class="ckd">&#10003;</b>Confirmed</span>
+    </div>
+    <div class="calscroll"><div class="calin">
+      <div class="dow"><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div></div>
+      <div class="grid" id="grid"></div>
+    </div></div>
+  </section>
+</main>
+
+<dialog id="dlg" aria-label="Booking details"></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ----- Settings (sample values: replace with your real ones) ----- */
+  var KEY = "itd-manager-bookings-v1";
+  var DEPOSIT_FLAT = 50; // the first hour
+  var CATS = [
+    { id: "basic", label: "Basic", long: "Basic interior cleaning" },
+    { id: "deep", label: "Deep", long: "Deep interior cleaning" },
+    { id: "leather", label: "Leather", long: "Leather & upholstery care" },
+    { id: "specialty", label: "Specialty", long: "Specialty interior services" }
+  ];
+  var CAT_SERVICE = { basic: "Standard interior detail", deep: "Deep interior cleaning", leather: "Leather & upholstery care" };
+  var PRICES = { basic: 100, deep: 87.5, leather: 75 };
+  var ADDONS = {
+    "Sand removal": 37.5, "Spill cleanup": 25, "Pet hair removal": 37.5, "Odor elimination": 50, "Smoke odor treatment": 75,
+    "Interior sanitization": 25, "Interior spot treatment": 12.5, "Child car seat area cleaning": 25, "Excessive dirt and debris removal": 37.5
+  };
+
+  /* ----- Helpers ----- */
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function key(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function parse(k) { var p = k.split("-"); return new Date(+p[0], +p[1] - 1, +p[2], 12); }
+  function fmtTime(t) { var p = t.split(":"), h = +p[0], s = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + p[1] + " " + s; }
+  function fmtDay(k) { return parse(k).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }); }
+  function fmtDayLong(k) { return parse(k).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); }
+  function money(n) { return "$" + (Math.round(n * 100) / 100).toFixed(2); }
+  function catColor(id) { return "var(--c-" + id + ")"; }
+  function catLabel(id) { for (var i = 0; i < CATS.length; i++) if (CATS[i].id === id) return CATS[i].label; return id; }
+
+  function catsOf(b) {
+    var out = [];
+    CATS.forEach(function (c) {
+      if (c.id === "specialty") { if (b.addons && b.addons.length) out.push(c.id); }
+      else if (b.cats && b.cats.indexOf(c.id) > -1) out.push(c.id);
+    });
+    return out;
+  }
+  function lines(b) {
+    var l = [];
+    ["basic", "deep", "leather"].forEach(function (id) {
+      if (b.cats && b.cats.indexOf(id) > -1) l.push({ name: CAT_SERVICE[id], price: PRICES[id], cat: id });
+    });
+    (b.addons || []).forEach(function (a) { l.push({ name: a, price: ADDONS[a] || 0, cat: "specialty" }); });
+    return l;
+  }
+  function totals(b) {
+    var t = lines(b).reduce(function (s, i) { return s + i.price; }, 0);
+    var d = Math.min(DEPOSIT_FLAT, t);
+    return { total: t, deposit: d, balance: t - d };
+  }
+  function labelsOf(b) { return catsOf(b).map(catLabel).join(" + "); }
+
+  /* ----- Data ----- */
+  var NAMES = ["Jordan Blake", "Priya Nair", "Marcus Lee", "Elena Ortiz", "Dev Patel", "Hannah Brooks", "Tyrone Walker", "Sofia Marino", "Caleb Nguyen", "Renee Foster", "Omar Haddad", "Lila Thompson", "Grant Sullivan", "Maya Chen", "Isaac Reed", "Nora Fitzgerald", "Andre Coleman", "Tessa Larson", "Victor Alvarez", "Brooke Hansen", "Miles Carter", "Ingrid Olsen", "Sam Okafor", "Paige Donovan", "Louis Bernard", "Kira Watanabe", "Ethan Novak", "Dana Whitaker", "Rosa Delgado", "Colin Murphy", "Yara Hassan", "Wes Kowalski"];
+  var CARS = ["2019 Honda Accord", "2021 Ford F-150", "2018 Toyota RAV4", "2022 Tesla Model 3", "2016 Chevrolet Tahoe", "2020 Subaru Outback", "2017 BMW 3 Series", "2023 Kia Telluride", "2015 Dodge Grand Caravan", "2019 Jeep Wrangler", "2021 Mazda CX-5", "2014 Audi A4", "2020 Ford Explorer", "2018 Chevrolet Silverado"];
+  var CODES = { b: ["basic"], bd: ["basic", "deep"], bl: ["basic", "leather"], bdl: ["basic", "deep", "leather"], "": [] };
+  var PLAN = [
+    [-16, "09:00", "b", [], 1], [-13, "10:30", "bd", [], 1], [-13, "14:00", "bl", [], 1], [-10, "09:00", "b", ["Pet hair removal"], 1],
+    [-8, "11:00", "bdl", [], 1], [-8, "13:30", "b", [], 1], [-8, "15:30", "bd", ["Odor elimination"], 1], [-6, "09:30", "bl", [], 1],
+    [-5, "10:00", "b", [], 1], [-5, "12:30", "bd", [], 1], [-5, "15:00", "", ["Spill cleanup"], 1], [-3, "09:00", "bd", [], 1],
+    [-3, "13:00", "b", [], 1], [-2, "10:00", "bl", ["Interior sanitization"], 1], [-1, "11:30", "b", [], 1], [0, "09:00", "bd", [], 1],
+    [0, "12:00", "b", ["Smoke odor treatment"], 1], [0, "15:00", "bl", [], 0], [1, "10:00", "b", [], 0], [1, "13:30", "bdl", [], 0],
+    [2, "09:30", "bd", ["Pet hair removal", "Odor elimination"], 1], [2, "14:00", "b", [], 0], [3, "11:00", "bl", [], 1],
+    [4, "10:00", "b", ["Child car seat area cleaning"], 0], [4, "12:30", "bd", [], 1], [4, "15:00", "b", [], 1],
+    [6, "09:00", "bdl", ["Sand removal"], 1], [7, "10:30", "b", [], 0], [9, "13:00", "bd", [], 0], [11, "09:30", "bl", [], 0], [14, "11:00", "b", [], 0]
+  ];
+  function seed() {
+    var out = [];
+    PLAN.forEach(function (p, i) {
+      var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + p[0]);
+      var name = NAMES[i % NAMES.length], parts = name.toLowerCase().split(" ");
+      out.push({
+        id: "s" + i, name: name, phone: "(920) 555-01" + pad(10 + (i * 7) % 90), email: parts[0] + "." + parts[1] + "@example.com",
+        vehicle: CARS[(i * 5) % CARS.length], date: key(d), time: p[1], cats: CODES[p[2]].slice(), addons: p[3].slice(),
+        confirmed: !!p[4], depositPaid: true, notes: ""
+      });
+    });
+    return out;
+  }
+  function load() { try { var s = localStorage.getItem(KEY); if (s) { var a = JSON.parse(s); if (Array.isArray(a)) return a; } } catch (e) {} return null; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(bookings)); } catch (e) {} }
+
+  var bookings = load() || seed();
+  var now = new Date();
+  var todayKey = key(now);
+  var view = { y: now.getFullYear(), m: now.getMonth() };
+
+  function byDate(k) {
+    return bookings.filter(function (b) { return b.date === k; }).sort(function (a, b) { return a.time < b.time ? -1 : a.time > b.time ? 1 : 0; });
+  }
+  function find(id) { for (var i = 0; i < bookings.length; i++) if (bookings[i].id === id) return bookings[i]; return null; }
+
+  /* ----- Toast ----- */
+  var toastTimer;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 3400);
+  }
+
+  /* ----- Tabs ----- */
+  function go(name) {
+    ["dashboard", "new", "calendar"].forEach(function (v) {
+      $("view-" + v).hidden = (v !== name);
+      $("tab-" + v).setAttribute("aria-selected", v === name ? "true" : "false");
+    });
+    window.scrollTo(0, 0);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) {
+    b.addEventListener("click", function () { go(b.dataset.view); });
+    b.addEventListener("keydown", function (e) {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab")), i = tabs.indexOf(b);
+      if (e.key === "ArrowRight") { e.preventDefault(); tabs[(i + 1) % tabs.length].focus(); tabs[(i + 1) % tabs.length].click(); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); tabs[(i + tabs.length - 1) % tabs.length].focus(); tabs[(i + tabs.length - 1) % tabs.length].click(); }
+    });
+  });
+
+  /* ----- Calendar ----- */
+  function makePill(b, col) {
+    var cs = catsOf(b), main = cs[0] || "specialty";
+    var btn = el("button", "ev"); btn.type = "button"; btn.style.setProperty("--c", catColor(main));
+    btn.appendChild(el("span", "nm", b.name));
+    if (b.confirmed) btn.appendChild(el("span", "ck", "\u2713"));
+    var extra = cs.slice(1);
+    if (extra.length) {
+      var caps = el("span", "caps");
+      extra.forEach(function (id) { var i = el("i"); i.style.background = catColor(id); caps.appendChild(i); });
+      btn.appendChild(caps);
+    }
+    var tip = el("span", "tip" + (col >= 5 ? " r" : ""), fmtTime(b.time) + " \u2014 " + b.name + " \u00b7 " + labelsOf(b));
+    tip.setAttribute("aria-hidden", "true"); btn.appendChild(tip);
+    btn.setAttribute("aria-label", fmtTime(b.time) + ", " + b.name + ", " + labelsOf(b) + (b.confirmed ? ", confirmed" : ", awaiting confirmation"));
+    btn.addEventListener("click", function () { openBooking(b.id); });
+    return btn;
+  }
+
+  function renderCal() {
+    var y = view.y, m = view.m;
+    $("mlabel").textContent = new Date(y, m, 1).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    var first = new Date(y, m, 1, 12), lead = (first.getDay() + 6) % 7;
+    var last = new Date(y, m + 1, 0, 12), tail = 6 - ((last.getDay() + 6) % 7);
+    var count = lead + last.getDate() + tail;
+    var grid = $("grid"); grid.innerHTML = "";
+    for (var i = 0; i < count; i++) {
+      var d = new Date(y, m, 1 - lead + i, 12), k = key(d);
+      var cell = el("div", "day" + (d.getMonth() !== m ? " out" : "") + (k === todayKey ? " today" : ""));
+      cell.appendChild(el("span", "n", String(d.getDate())));
+      var list = byDate(k);
+      list.forEach(function (b) { cell.appendChild(makePill(b, i % 7)); });
+      (function (kk, n) {
+        cell.addEventListener("click", function (e) {
+          if (e.target.closest(".ev") || !n) return;
+          openDay(kk);
+        });
+      })(k, list.length);
+      grid.appendChild(cell);
+    }
+  }
+  $("prevM").addEventListener("click", function () { view.m--; if (view.m < 0) { view.m = 11; view.y--; } renderCal(); });
+  $("nextM").addEventListener("click", function () { view.m++; if (view.m > 11) { view.m = 0; view.y++; } renderCal(); });
+  $("thisM").addEventListener("click", function () { view.y = now.getFullYear(); view.m = now.getMonth(); renderCal(); });
+  $("makeBtn").addEventListener("click", function () { go("new"); });
+
+  /* ----- Dialog ----- */
+  var dlg = $("dlg");
+  function closeDlg() { if (dlg.open) dlg.close(); }
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) closeDlg(); });
+  function dlgHead(title, sub) {
+    var h = el("div", "dlg-h"), w = el("div");
+    w.appendChild(el("h2", null, title));
+    if (sub) w.appendChild(el("p", "sub", sub));
+    var x = el("button", "x", "\u00d7"); x.type = "button"; x.setAttribute("aria-label", "Close"); x.addEventListener("click", closeDlg);
+    h.appendChild(w); h.appendChild(x); return h;
+  }
+  function openDlg() { if (!dlg.open) dlg.showModal(); }
+  function kvRow(dl, k, v, href) {
+    dl.appendChild(el("dt", null, k));
+    var dd = el("dd");
+    if (href) { var a = el("a", null, v); a.href = href; dd.appendChild(a); } else dd.textContent = v;
+    dl.appendChild(dd);
+  }
+
+  function openBooking(id) {
+    var b = find(id); if (!b) return;
+    dlg.innerHTML = "";
+    dlg.appendChild(dlgHead(b.name, fmtDay(b.date) + " \u00b7 " + fmtTime(b.time)));
+    var body = el("div", "dlg-b");
+    body.appendChild(el("span", "badge " + (b.confirmed ? "ok" : "wait"), b.confirmed ? "\u2713 Confirmed" : "Awaiting confirmation"));
+    var kv = el("dl", "kv");
+    kvRow(kv, "Vehicle", b.vehicle || "Not given");
+    if (b.phone) kvRow(kv, "Phone", b.phone, "tel:" + b.phone.replace(/[^0-9+]/g, ""));
+    if (b.email) kvRow(kv, "Email", b.email, "mailto:" + encodeURI(b.email));
+    if (b.notes) kvRow(kv, "Notes", b.notes);
+    body.appendChild(kv);
+
+    body.appendChild(el("h3", "dsec", "Services"));
+    var ul = el("ul", "svc");
+    lines(b).forEach(function (i) {
+      var li = el("li"), d = el("i", "dot"); d.style.background = catColor(i.cat);
+      li.appendChild(d); li.appendChild(el("span", "nm", i.name)); li.appendChild(el("span", "pr", money(i.price))); ul.appendChild(li);
+    });
+    body.appendChild(ul);
+
+    var t = totals(b), tot = el("div", "tot");
+    [["Estimated total", money(t.total), ""], [b.depositPaid ? "Deposit paid (first hour) \u2713" : "Deposit not yet collected (first hour)", money(t.deposit), "dep"], ["Balance due at appointment", money(t.balance), "mu"]].forEach(function (r) {
+      var row = el("div", "r " + r[2]); row.appendChild(el("span", null, r[0])); row.appendChild(el("span", null, r[1])); tot.appendChild(row);
+    });
+    body.appendChild(tot);
+
+    var acts = el("div", "dacts");
+    function drawActs(confirming) {
+      acts.innerHTML = "";
+      if (confirming) {
+        acts.appendChild(el("p", "warn", "Cancel this booking? If a deposit was paid, refund it in Square."));
+        var yes = el("button", "btn primary", "Yes, cancel booking"); yes.type = "button";
+        yes.addEventListener("click", function () {
+          bookings = bookings.filter(function (x) { return x.id !== b.id; }); save(); renderAll(); closeDlg(); toast("Booking cancelled");
+        });
+        var keep = el("button", "btn ghost", "Keep booking"); keep.type = "button";
+        keep.addEventListener("click", function () { drawActs(false); });
+        acts.appendChild(yes); acts.appendChild(keep);
+      } else {
+        if (!b.confirmed) {
+          var c = el("button", "btn primary", "Confirm booking"); c.type = "button";
+          c.addEventListener("click", function () { b.confirmed = true; save(); renderAll(); toast("Confirmed: " + b.name); openBooking(b.id); });
+          acts.appendChild(c);
+        }
+        var cn = el("button", "btn ghost", "Cancel booking"); cn.type = "button";
+        cn.addEventListener("click", function () { drawActs(true); });
+        acts.appendChild(cn);
+      }
+    }
+    drawActs(false);
+    body.appendChild(acts);
+    dlg.appendChild(body); openDlg();
+  }
+
+  function openDay(k) {
+    var list = byDate(k);
+    dlg.innerHTML = "";
+    dlg.appendChild(dlgHead(fmtDayLong(k), list.length + (list.length === 1 ? " booking" : " bookings")));
+    var body = el("div", "dlg-b");
+    if (!list.length) body.appendChild(el("p", "foot", "No bookings this day."));
+    list.forEach(function (b) {
+      var r = el("button", "dayrow"); r.type = "button";
+      r.appendChild(el("span", "t", fmtTime(b.time)));
+      var p = el("span", "p"), dots = el("span", "dots");
+      catsOf(b).forEach(function (id) { var d = el("i", "dot"); d.style.background = catColor(id); dots.appendChild(d); });
+      p.appendChild(dots); p.appendChild(document.createTextNode(b.name + (b.confirmed ? " \u2713" : "")));
+      p.appendChild(el("small", null, labelsOf(b) + " \u00b7 " + (b.vehicle || "")));
+      r.appendChild(p);
+      r.addEventListener("click", function () { openBooking(b.id); });
+      body.appendChild(r);
+    });
+    var add = el("button", "btn ghost", "Add a booking for this day"); add.type = "button"; add.style.marginTop = "18px";
+    add.addEventListener("click", function () { closeDlg(); $("nbDate").value = k; go("new"); renderNb(); });
+    body.appendChild(add);
+    dlg.appendChild(body); openDlg();
+  }
+
+  /* ----- Dashboard ----- */
+  function bookRow(b, withConfirm) {
+    var r = el("div", "row"), when = el("div", "when"), who = el("div", "who"), acts = el("div", "acts");
+    when.appendChild(el("strong", null, fmtDay(b.date))); when.appendChild(el("span", null, fmtTime(b.time)));
+    who.appendChild(el("strong", null, b.name));
+    var sub = el("span"), dots = el("span", "dots");
+    catsOf(b).forEach(function (id) { var d = el("i", "dot"); d.style.background = catColor(id); dots.appendChild(d); });
+    sub.appendChild(dots); sub.appendChild(document.createTextNode(labelsOf(b) + " \u00b7 " + b.vehicle));
+    who.appendChild(sub);
+    if (withConfirm) {
+      var c = el("button", "btn primary sm", "Confirm"); c.type = "button";
+      c.addEventListener("click", function () { b.confirmed = true; save(); renderAll(); toast("Confirmed: " + b.name); });
+      acts.appendChild(c);
+    }
+    var v = el("button", "btn ghost sm", "View"); v.type = "button"; v.addEventListener("click", function () { openBooking(b.id); });
+    acts.appendChild(v);
+    r.appendChild(when); r.appendChild(who); r.appendChild(acts); return r;
+  }
+  function renderDash() {
+    var d7 = new Date(); d7.setDate(d7.getDate() + 7); var k7 = key(d7);
+    var monthPrefix = todayKey.slice(0, 7);
+    var pending = bookings.filter(function (b) { return !b.confirmed && b.date >= todayKey; }).sort(function (a, b) { return (a.date + a.time) < (b.date + b.time) ? -1 : 1; });
+    var today = byDate(todayKey);
+    var next7 = bookings.filter(function (b) { return b.date > todayKey && b.date <= k7; }).length;
+    var dep = bookings.filter(function (b) { return b.depositPaid && b.date.slice(0, 7) === monthPrefix; }).reduce(function (s, b) { return s + totals(b).deposit; }, 0);
+    var stats = $("stats"); stats.innerHTML = "";
+    [[pending.length, "Awaiting confirmation"], [today.length, "Appointments today"], [next7, "Coming up in the next 7 days"], [money(dep), "Deposits collected this month"]].forEach(function (s) {
+      var c = el("div", "stat"); c.appendChild(el("div", "v", String(s[0]))); c.appendChild(el("div", "k", s[1])); stats.appendChild(c);
+    });
+    var pl = $("pendingList"); pl.innerHTML = "";
+    if (!pending.length) pl.appendChild(el("p", "empty", "Nothing waiting. Every upcoming booking is confirmed."));
+    pending.slice(0, 8).forEach(function (b) { pl.appendChild(bookRow(b, true)); });
+    var tl = $("todayList"); tl.innerHTML = "";
+    if (!today.length) tl.appendChild(el("p", "empty", "No appointments today."));
+    today.forEach(function (b) { tl.appendChild(bookRow(b, false)); });
+  }
+  $("resetData").addEventListener("click", function () { bookings = seed(); save(); renderAll(); toast("Sample data reset"); });
+
+  /* ----- New booking ----- */
+  function buildForm() {
+    var sv = $("nbServices"); sv.innerHTML = "";
+    ["basic", "deep", "leather"].forEach(function (id) {
+      var l = el("label", "opt"), i = el("input"); i.type = "checkbox"; i.name = "nbcat"; i.value = id; if (id === "basic") i.checked = true;
+      var bx = el("span", "box"); bx.appendChild(el("span", "name", CAT_SERVICE[id] + " \u00b7 " + money(PRICES[id])));
+      l.appendChild(i); l.appendChild(bx); sv.appendChild(l);
+    });
+    var ad = $("nbAddons"); ad.innerHTML = "";
+    Object.keys(ADDONS).forEach(function (n) {
+      var l = el("label", "opt"), i = el("input"); i.type = "checkbox"; i.name = "nbadd"; i.value = n;
+      var bx = el("span", "box"); bx.appendChild(el("span", "name", n + " \u00b7 " + money(ADDONS[n])));
+      l.appendChild(i); l.appendChild(bx); ad.appendChild(l);
+    });
+    var sel = $("nbTime"); sel.innerHTML = "";
+    for (var h = 8; h <= 17; h++) [0, 30].forEach(function (mm) {
+      if (h === 17 && mm === 30) return;
+      var v = pad(h) + ":" + pad(mm), o = el("option", null, fmtTime(v)); o.value = v; if (v === "10:00") o.selected = true; sel.appendChild(o);
+    });
+    var dt = new Date(); $("nbDate").min = key(dt);
+  }
+  function checkedVals(name) { return Array.prototype.map.call(document.querySelectorAll('input[name="' + name + '"]:checked'), function (e) { return e.value; }); }
+  function renderNb() {
+    var t = totals({ cats: checkedVals("nbcat"), addons: checkedVals("nbadd") });
+    $("nbTotal").textContent = money(t.total);
+    $("nbDepLabel").textContent = "Deposit (first hour)";
+    $("nbDepAmt").textContent = money(t.deposit);
+  }
+  $("nbForm").addEventListener("change", renderNb);
+  $("nbForm").addEventListener("submit", function (e) { e.preventDefault(); });
+  $("nbSave").addEventListener("click", function () {
+    var err = $("nbErr"), name = $("nbName").value.trim(), date = $("nbDate").value;
+    var cats = checkedVals("nbcat"), addons = checkedVals("nbadd");
+    if (!name) { err.textContent = "Add the customer's name."; $("nbName").focus(); return; }
+    if (!date) { err.textContent = "Choose a date for the appointment."; $("nbDate").focus(); return; }
+    if (!cats.length && !addons.length) { err.textContent = "Choose at least one service."; return; }
+    err.textContent = "";
+    var b = {
+      id: "n" + Date.now(), name: name, phone: $("nbPhone").value.trim(), email: $("nbEmail").value.trim(), vehicle: $("nbVehicle").value.trim(),
+      date: date, time: $("nbTime").value, cats: cats, addons: addons, confirmed: $("nbConf").checked, depositPaid: $("nbDep").checked, notes: $("nbNotes").value.trim()
+    };
+    bookings.push(b); save();
+    $("nbForm").reset(); buildForm(); renderNb();
+    var d = parse(date); view.y = d.getFullYear(); view.m = d.getMonth();
+    renderAll(); go("calendar"); toast("Added to calendar: " + name);
+  });
+
+  function renderAll() { renderCal(); renderDash(); }
+  buildForm(); renderNb(); renderAll();
+})();
+</script>
+</body>
+</html>
